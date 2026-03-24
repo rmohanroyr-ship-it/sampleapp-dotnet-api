@@ -8,21 +8,26 @@ variables:
   buildConfiguration: 'Release'
 
 steps:
+# Install .NET
 - task: UseDotNet@2
   inputs:
     packageType: 'sdk'
     version: '8.x'
 
+# Build
 - script: dotnet restore
   displayName: 'Restore'
 
 - script: dotnet build --configuration $(buildConfiguration)
   displayName: 'Build'
 
+# Publish
 - script: dotnet publish -c $(buildConfiguration) -o $(Build.ArtifactStagingDirectory)
   displayName: 'Publish'
 
-- task: PublishBuildArtifacts@1
+# Deploy to Azure App Service
+- task: AzureWebApp@1
   inputs:
-    pathToPublish: '$(Build.ArtifactStagingDirectory)'
-    artifactName: 'drop'
+    azureSubscription: 'azure-conn'
+    appName: 'samplefirstdotnetapp'
+    package: '$(Build.ArtifactStagingDirectory)'
